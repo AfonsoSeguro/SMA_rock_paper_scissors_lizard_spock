@@ -25,11 +25,11 @@ public class Jogador_Dummy extends Agent {
         this.agents = new ArrayList<>();
         this.armas = new ArrayList();
         for (int i = 0; i < 3; i++) {
-            armas.add("Scissors");
-            armas.add("Paper");
-            armas.add("Rock");
-            armas.add("Lizard");
-            armas.add("Spock");
+            this.armas.add("Scissors");
+            this.armas.add("Paper");
+            this.armas.add("Rock");
+            this.armas.add("Lizard");
+            this.armas.add("Spock");
         }
         this.rand = new Random();
     }
@@ -81,6 +81,7 @@ public class Jogador_Dummy extends Agent {
                     message.setContent(armas.remove(rand.nextInt(armas.size())).toString());
                     message.addReceiver(msg.getSender());
                     send(message);
+                    if(armas.size() == 0)myAgent.doDelete();
                 }
                 else block();
             }

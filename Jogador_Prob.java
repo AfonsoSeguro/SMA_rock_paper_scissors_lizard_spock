@@ -10,10 +10,12 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
-public class Jogador_MinMax extends Agent {
+public class Jogador_Prob extends Agent {
 
     AID mestre;
 
@@ -35,7 +37,7 @@ public class Jogador_MinMax extends Agent {
     Queue<String> message_queue;
 
 
-    public Jogador_MinMax(){
+    public Jogador_Prob(){
         super();
         this.index = -1;
         this.mestre = null;
@@ -235,9 +237,7 @@ public class Jogador_MinMax extends Agent {
             }
         }, "INTENTION");
 
-
-
-        fsm.registerState(new OneShotBehaviour(){//Envia a jogada escolhida ao mestre e retira da lista de mãos disponiveis para jogar
+        fsm.registerState(new OneShotBehaviour(){//Envia uma jogada ao mestre e retira da lista de hipóteses
 
             @Override
             public void action() {
