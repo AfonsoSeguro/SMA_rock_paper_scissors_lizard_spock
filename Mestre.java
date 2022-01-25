@@ -11,10 +11,8 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
-import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.proto.ContractNetInitiator;
 
 import java.util.*;
 
@@ -22,9 +20,8 @@ public class Mestre extends Agent {
 
     List<AID> agents;
     ArrayList<Integer> pontos;
-    ArrayList<ArrayList<String>> dados;
+    ArrayList<String [] > dados;
     Queue<ACLMessage> message_queue;
-
 
     public Mestre() {
         super();
@@ -62,15 +59,12 @@ public class Mestre extends Agent {
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
                     agents.clear();
-                    dados.clear();
                     pontos.clear();
                     for (int i = 0; i < result.length; i++) {
                         if (!result[i].getName().getName().equals(myAgent.getName()))
                             agents.add(result[i].getName());
-                            dados.add(new ArrayList());
                             pontos.add(0);
                     }
-                    dados.remove(dados.size() - 1);
                     pontos.remove(pontos.size() - 1);
                 } catch (FIPAException e) {
                     e.printStackTrace();
@@ -85,9 +79,7 @@ public class Mestre extends Agent {
                 ACLMessage m = myAgent.receive(MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE)));
                 if(m != null){
                     if(m.getPerformative() == ACLMessage.REQUEST)pb.addSubBehaviour(new Play_Game());
-                    else if(m.getPerformative() == ACLMessage.PROPOSE){
-                        message_queue.add(m);
-                    }
+                    else message_queue.add(m);
                 }
                 else block();
             }
@@ -113,64 +105,80 @@ public class Mestre extends Agent {
         public void action() {
             if(done){
                 done = false;
-                ACLMessage message = new ACLMessage(ACLMessage.CFP);
-                for (int i = 0; i < agents.size(); i++) message.addReceiver(agents.get(i));
-                message.setContent("play");
-                send(message);
+                if(dados.size() > 0){
+                    ACLMessage message = new ACLMessage(ACLMessage.CFP);
+                    for (int i = 0; i < agents.size(); i++) message.addReceiver(agents.get(i));
+                    String jog_ant = "";
+                    String [] ult_jog = dados.get(dados.size() - 1);
+                    for (int j = 0; j < ult_jog.length; j++) {
+                        jog_ant += ult_jog[j] + " ";
+                    }
+                    jog_ant = jog_ant.trim();
+                    message.setContent(jog_ant);
+                    send(message);
+                }
+                else{
+                    for (int j = 0; j < agents.size(); j++) {
+                        ACLMessage message = new ACLMessage(ACLMessage.CFP);
+                        message.addReceiver(agents.get(j));
+                        message.setContent(j + " play");
+                        send(message);
+                    }
+                }
+
                 System.out.println("Ronda " + i);
             }
             else if(!done && message_queue.size() == agents.size()){
-                ArrayList<String> jog_ronda = new ArrayList(agents.size());
-                for (int j = 0; j < agents.size(); j++)jog_ronda.add("");
+                String [] jog_ronda = new String [agents.size()];
                 for (int j = 0; j < agents.size(); j++) {
                     ACLMessage msg = message_queue.remove();
                     int k = 0;
                     for(;k < agents.size(); k++){
-                        if(agents.get(k).equals(msg.getSender()))break;
+                        if(agents.get(k).getName().equals(msg.getSender().getName()))break;
                     }
-                    jog_ronda.set(k, msg.getContent());
+                    jog_ronda[k] =  msg.getContent();
                     System.out.println(msg.getSender().getName() + " jogou " + msg.getContent());
 
                 }
                 dados.add(jog_ronda);
                 for (int j = 0; j < pontos.size(); j++) {
-                    String jogada = jog_ronda.get(j);
+                    String jogada = jog_ronda[j];
                     for (int k = 0; k < agents.size(); k++) {
                         if(k != j){
                             if(jogada.equals("Scissors")){
-                                if(jog_ronda.get(k).equals("Scissors"))pontos.set(j, pontos.get(j));
-                                else if(jog_ronda.get(k).equals("Paper"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Rock"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Lizard"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Spock"))pontos.set(j, pontos.get(j) - 1);
+                                if(jog_ronda[k].equals("Scissors"))pontos.set(j, pontos.get(j));
+                                else if(jog_ronda[k].equals("Paper"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Rock"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Lizard"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Spock"))pontos.set(j, pontos.get(j) - 1);
                             }
                             else if(jogada.equals("Paper")){
-                                if(jog_ronda.get(k).equals("Scissors"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Paper"))pontos.set(j, pontos.get(j));
-                                else if(jog_ronda.get(k).equals("Rock"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Lizard"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Spock"))pontos.set(j, pontos.get(j) + 1);
+                                if(jog_ronda[k].equals("Scissors"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Paper"))pontos.set(j, pontos.get(j));
+                                else if(jog_ronda[k].equals("Rock"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Lizard"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Spock"))pontos.set(j, pontos.get(j) + 1);
                             }
                             else if(jogada.equals("Rock")){
-                                if(jog_ronda.get(k).equals("Scissors"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Paper"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Rock"))pontos.set(j, pontos.get(j));
-                                else if(jog_ronda.get(k).equals("Lizard"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Spock"))pontos.set(j, pontos.get(j) - 1);
+                                if(jog_ronda[k].equals("Scissors"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Paper"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Rock"))pontos.set(j, pontos.get(j));
+                                else if(jog_ronda[k].equals("Lizard"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Spock"))pontos.set(j, pontos.get(j) - 1);
                             }
                             else if(jogada.equals("Lizard")){
-                                if(jog_ronda.get(k).equals("Scissors"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Paper"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Rock"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Lizard"))pontos.set(j, pontos.get(j));
-                                else if(jog_ronda.get(k).equals("Spock"))pontos.set(j, pontos.get(j) + 1);
+                                if(jog_ronda[k].equals("Scissors"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Paper"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Rock"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Lizard"))pontos.set(j, pontos.get(j));
+                                else if(jog_ronda[k].equals("Spock"))pontos.set(j, pontos.get(j) + 1);
                             }
                             else if(jogada.equals("Spock")){
-                                if(jog_ronda.get(k).equals("Scissors"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Paper"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Rock"))pontos.set(j, pontos.get(j) + 1);
-                                else if(jog_ronda.get(k).equals("Lizard"))pontos.set(j, pontos.get(j) - 1);
-                                else if(jog_ronda.get(k).equals("Spock"))pontos.set(j, pontos.get(j));
+                                if(jog_ronda[k].equals("Scissors"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Paper"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Rock"))pontos.set(j, pontos.get(j) + 1);
+                                else if(jog_ronda[k].equals("Lizard"))pontos.set(j, pontos.get(j) - 1);
+                                else if(jog_ronda[k].equals("Spock"))pontos.set(j, pontos.get(j));
                             }
                         }
                     }

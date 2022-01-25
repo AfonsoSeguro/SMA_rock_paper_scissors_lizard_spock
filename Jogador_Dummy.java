@@ -8,22 +8,19 @@ import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.*;
 import jade.domain.FIPAException;
-import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-import jade.proto.ContractNetResponder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Jogador extends Agent {
+public class Jogador_Dummy extends Agent {
 
     List<AID> agents;
     ArrayList<String> armas;
     Random rand;
 
-    public Jogador(){
+    public Jogador_Dummy(){
         super();
         this.agents = new ArrayList<>();
         this.armas = new ArrayList();
@@ -66,8 +63,7 @@ public class Jogador extends Agent {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
                     agents.clear();
                     for (int i = 0; i < result.length; i++) {
-                        if (!result[i].getName().getName().equals(myAgent.getName()))
-                            agents.add(result[i].getName());
+                        if (!result[i].getName().getName().equals(myAgent.getName()))agents.add(result[i].getName());
                     }
                 } catch (FIPAException e) {
                     e.printStackTrace();

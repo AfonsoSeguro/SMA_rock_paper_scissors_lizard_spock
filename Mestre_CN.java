@@ -20,7 +20,6 @@ public class Mestre_CN extends Agent {
     ArrayList<Integer> pontos;
     ArrayList<ArrayList<String>> dados;
 
-
     public Mestre_CN() {
         super();
         this.agents = new ArrayList<>();
