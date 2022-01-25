@@ -10,11 +10,12 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
-//falta optimização redux
-public class Jogador_MinMax extends Agent {
+public class Jogador_All extends Agent {
 
     AID mestre;
 
@@ -34,7 +35,7 @@ public class Jogador_MinMax extends Agent {
     Queue<String> message_queue;
 
 
-    public Jogador_MinMax(){
+    public Jogador_All(){
         super();
         this.index = -1;
         this.mestre = null;
@@ -168,20 +169,10 @@ public class Jogador_MinMax extends Agent {
             @Override
             public void action() {
                 jogs.clear();
-                ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
+                ArrayList<String []> hip = new ArrayList();
                 calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
                 for (int i = 0; i < hip.size(); i++) {
-                    ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)armas_oponentes.clone();
-                    for (int j = 0; j < jog_pos_aux.size(); j++) {
-                        jog_pos_aux.set(j, (ArrayList<String>) armas_oponentes.get(j).clone());
-                        for (int k = 0; k < jog_pos_aux.get(j).size(); k++) {
-                            if(jog_pos_aux.get(j).get(k).equals(hip.get(i)[j])){
-                                jog_pos_aux.get(j).remove(k);
-                                break;
-                            }
-                        }
-                    }
-                    jogs.add(new Jogada(hip.get(i)[index], min(jog_pos_aux, hip.get(i), -60, 60,2)));//alterar depth
+                    jogs.add(new Jogada(hip.get(i)[index], calc_pontos(hip.get(i), index)));
                 }
                 change_state = 1;
             }
@@ -200,10 +191,15 @@ public class Jogador_MinMax extends Agent {
             @Override
             public void action() {
                 if (jogs.size() > 0) {
-                    jog = new Jogada("", -60);
-                    int val = -60;
+                    Jogada [] jogadas = new Jogada[]{new Jogada("Scissors", 0),new Jogada("Paper", 0),new Jogada("Rock", 0),new Jogada("Lizard", 0),new Jogada("Spock", 0)};
                     for (int i = 0; i < jogs.size(); i++) {
-                        if(jogs.get(i).valor > jog.valor)jog = jogs.get(i);
+                        for (int j = 0; j < jogadas.length; j++) {
+                            if(jogs.get(i).jogada.equals(jogadas[j].jogada))jogadas[j].valor += jogs.get(i).valor;
+                        }
+                    }
+                    jog = new Jogada(armas.get(0), -60);
+                    for (int i = 0; i < jogadas.length; i++) {
+                        if(jog.valor < jogadas[i].valor && contains_Jog(armas, jogadas[i].jogada))jog = jogadas[i];
                     }
                     jogs.clear();
                     change_state = 1;
@@ -269,52 +265,11 @@ public class Jogador_MinMax extends Agent {
         }
     }
 
-    public int min(ArrayList<ArrayList<String>> jog_pos, String [] jog_ant, int alpha, int beta, int depth){
-        if(depth == 0)return calc_pontos(jog_ant, index);
-        int pont = +60;
-        ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-        calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
-        for (int i = 0; i < hip.size(); i++) {
-            ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)jog_pos.clone();
-            for (int j = 0; j < jog_pos_aux.size(); j++) {
-                jog_pos_aux.set(j, (ArrayList<String>) jog_pos.get(j).clone());
-                for (int k = 0; k < jog_pos_aux.get(j).size(); k++) {
-                    if(jog_pos_aux.get(j).get(k).equals(hip.get(i)[j])){
-                        jog_pos_aux.get(j).remove(k);
-                        break;
-                    }
-                }
-            }
-            int val = max(jog_pos_aux, hip.get(i), alpha, beta,depth - 1);
-            pont = pont < val ? pont : val;
-            alpha = alpha > val ? alpha : val;
-            if(beta <= alpha)break;
+    public boolean contains_Jog(ArrayList<String> jogs, String jog){
+        for (String j:jogs) {
+            if(j.equals("jog"))return true;
         }
-        return pont;
-    }
-
-    public int max(ArrayList<ArrayList<String>> jog_pos, String [] jog_ant, int alpha, int beta, int depth){
-        if(depth == 0)return calc_pontos(jog_ant, index);
-        int pont = -60;
-        ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-        calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
-        for (int i = 0; i < hip.size(); i++) {
-            ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)jog_pos.clone();
-            for (int j = 0; j < jog_pos_aux.size(); j++) {
-                jog_pos_aux.set(j, (ArrayList<String>) jog_pos.get(j).clone());
-                for (int k = 0; k < jog_pos_aux.get(j).size(); k++) {
-                    if(jog_pos_aux.get(j).get(k).equals(hip.get(i)[j])){
-                        jog_pos_aux.get(j).remove(k);
-                        break;
-                    }
-                }
-            }
-            int val = min(jog_pos_aux, hip.get(i), alpha, beta,depth - 1);
-            pont = pont > val ? pont : val;
-            beta = beta < val ? beta : val;
-            if(beta <= alpha)break;
-        }
-        return pont;
+        return false;
     }
 
     public void calc_hip(ArrayList<String [] > hip, ArrayList<ArrayList<String>> jog_pos, String [] jog, int nivel){

@@ -125,7 +125,6 @@ public class Mestre extends Agent {
                         send(message);
                     }
                 }
-
                 System.out.println("Ronda " + i);
             }
             else if(!done && message_queue.size() == agents.size()){
