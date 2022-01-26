@@ -82,20 +82,22 @@ public class Jogador_All extends Agent {
                 template.addServices(sd);
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
-                    agents.clear();
-                    armas_oponentes.clear();
-                    for (int i = 0; i < result.length; i++) {
-                        if (!result[i].getName().getName().equals(myAgent.getName())){
-                            agents.add(result[i].getName());
-                            ArrayList<String> arm = new ArrayList<>();
-                            for (int j = 0; j < 3; j++) {
-                                arm.add("Scissors");
-                                arm.add("Paper");
-                                arm.add("Rock");
-                                arm.add("Lizard");
-                                arm.add("Spock");
+                    if(result.length != agents.size() + 1) {
+                        agents.clear();
+                        armas_oponentes.clear();
+                        for (int i = 0; i < result.length; i++) {
+                            if (!result[i].getName().getName().equals(myAgent.getName())) {
+                                agents.add(result[i].getName());
+                                ArrayList<String> arm = new ArrayList<>();
+                                for (int j = 0; j < 3; j++) {
+                                    arm.add("Scissors");
+                                    arm.add("Paper");
+                                    arm.add("Rock");
+                                    arm.add("Lizard");
+                                    arm.add("Spock");
+                                }
+                                armas_oponentes.add(arm);
                             }
-                            armas_oponentes.add(arm);
                         }
                     }
                 } catch (FIPAException e) {
@@ -142,6 +144,7 @@ public class Jogador_All extends Agent {
                                     break;
                                 }
                             }
+                            armas_oponentes.set(i, arm_array);
                         }
                     }
                     else{

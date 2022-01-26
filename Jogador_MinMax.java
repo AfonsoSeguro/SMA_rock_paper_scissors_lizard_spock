@@ -23,6 +23,8 @@ public class Jogador_MinMax extends Agent {
     ArrayList<String> armas;
     ArrayList<ArrayList<String>> armas_oponentes;
 
+    ArrayList<String> armas_redux;
+    ArrayList<ArrayList<String>> armas_oponentes_redux;
 
     ArrayList<Jogada> jogs;
     Jogada jog;
@@ -52,6 +54,8 @@ public class Jogador_MinMax extends Agent {
         this.armas_oponentes = new ArrayList();
         this.jogs = new ArrayList<>();
         this.jog = new Jogada("", -60);
+        this.armas_redux = convert_redux(armas);
+        this.armas_oponentes_redux = new ArrayList<>();
     }
 
 
@@ -81,20 +85,24 @@ public class Jogador_MinMax extends Agent {
                 template.addServices(sd);
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
-                    agents.clear();
-                    armas_oponentes.clear();
-                    for (int i = 0; i < result.length; i++) {
-                        if (!result[i].getName().getName().equals(myAgent.getName())){
-                            agents.add(result[i].getName());
-                            ArrayList<String> arm = new ArrayList<>();
-                            for (int j = 0; j < 3; j++) {
-                                arm.add("Scissors");
-                                arm.add("Paper");
-                                arm.add("Rock");
-                                arm.add("Lizard");
-                                arm.add("Spock");
+                    if(result.length != agents.size() + 1) {
+                        agents.clear();
+                        armas_oponentes.clear();
+                        armas_oponentes_redux.clear();
+                        for (int i = 0; i < result.length; i++) {
+                            if (!result[i].getName().getName().equals(myAgent.getName())) {
+                                agents.add(result[i].getName());
+                                ArrayList<String> arm = new ArrayList<>();
+                                for (int j = 0; j < 3; j++) {
+                                    arm.add("Scissors");
+                                    arm.add("Paper");
+                                    arm.add("Rock");
+                                    arm.add("Lizard");
+                                    arm.add("Spock");
+                                }
+                                armas_oponentes.add(arm);
+                                armas_oponentes_redux = convert_redux_array(armas_oponentes);
                             }
-                            armas_oponentes.add(arm);
                         }
                     }
                 } catch (FIPAException e) {
@@ -141,7 +149,9 @@ public class Jogador_MinMax extends Agent {
                                     break;
                                 }
                             }
+                            armas_oponentes.set(i, arm_array);
                         }
+                        armas_oponentes_redux = convert_redux_array(armas_oponentes);
                     }
                     else{
                         index = Integer.parseInt(msg.split(" ")[0]);
@@ -169,11 +179,11 @@ public class Jogador_MinMax extends Agent {
             public void action() {
                 jogs.clear();
                 ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-                calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
+                calc_hip(hip, armas_oponentes_redux, new String[agents.size()], 0);
                 for (int i = 0; i < hip.size(); i++) {
-                    ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)armas_oponentes.clone();
+                    ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)armas_oponentes_redux.clone();
                     for (int j = 0; j < jog_pos_aux.size(); j++) {
-                        jog_pos_aux.set(j, (ArrayList<String>) armas_oponentes.get(j).clone());
+                        jog_pos_aux.set(j, (ArrayList<String>) armas_oponentes_redux.get(j).clone());
                         for (int k = 0; k < jog_pos_aux.get(j).size(); k++) {
                             if(jog_pos_aux.get(j).get(k).equals(hip.get(i)[j])){
                                 jog_pos_aux.get(j).remove(k);
@@ -181,7 +191,7 @@ public class Jogador_MinMax extends Agent {
                             }
                         }
                     }
-                    jogs.add(new Jogada(hip.get(i)[index], min(jog_pos_aux, hip.get(i), -60, 60,2)));//alterar depth
+                    jogs.add(new Jogada(hip.get(i)[index], min(jog_pos_aux, hip.get(i), -60, 60,5)));//alterar depth
                 }
                 change_state = 1;
             }
@@ -236,6 +246,7 @@ public class Jogador_MinMax extends Agent {
                             break;
                         }
                     }
+                    armas_redux = convert_redux(armas);
                     jog = new Jogada("",-60);
                     if(armas.size() == 0)myAgent.doDelete();
                 }
@@ -269,11 +280,34 @@ public class Jogador_MinMax extends Agent {
         }
     }
 
+    public ArrayList<String> convert_redux(ArrayList<String> array){
+        ArrayList<String> result = new ArrayList<>();
+        for (int i = 0; i < array.size(); i++) {
+            boolean contains = false;
+            for (int j = 0; j < result.size(); j++) {
+                if(result.get(j).equals(array.get(i))){
+                    contains = true;
+                    break;
+                }
+            }
+            if(!contains)result.add(array.get(i));
+        }
+        return result;
+    }
+
+    public ArrayList<ArrayList<String>> convert_redux_array(ArrayList<ArrayList<String>> array){
+        ArrayList<ArrayList<String>> result = new ArrayList<>();
+        for (int i = 0; i < array.size(); i++) {
+            result.add(convert_redux(array.get(i)));
+        }
+        return result;
+    }
+
     public int min(ArrayList<ArrayList<String>> jog_pos, String [] jog_ant, int alpha, int beta, int depth){
-        if(depth == 0)return calc_pontos(jog_ant, index);
+        if(depth == 0 || jog_pos.size() <= 2)return calc_pontos(jog_ant, index);
         int pont = +60;
         ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-        calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
+        calc_hip(hip, jog_pos, new String[agents.size()], 0);
         for (int i = 0; i < hip.size(); i++) {
             ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)jog_pos.clone();
             for (int j = 0; j < jog_pos_aux.size(); j++) {
@@ -294,10 +328,10 @@ public class Jogador_MinMax extends Agent {
     }
 
     public int max(ArrayList<ArrayList<String>> jog_pos, String [] jog_ant, int alpha, int beta, int depth){
-        if(depth == 0)return calc_pontos(jog_ant, index);
+        if(depth == 0 || jog_pos.size() <= 2)return calc_pontos(jog_ant, index);
         int pont = -60;
         ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-        calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
+        calc_hip(hip, jog_pos, new String[agents.size()], 0);
         for (int i = 0; i < hip.size(); i++) {
             ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)jog_pos.clone();
             for (int j = 0; j < jog_pos_aux.size(); j++) {

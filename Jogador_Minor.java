@@ -13,7 +13,7 @@ import jade.proto.ContractNetResponder;
 
 import java.util.*;
 
-public class JogadorMinor extends Agent {
+public class Jogador_Minor extends Agent {
     AID mestre;
     List<AID> agents;
     ArrayList<String> armas;
@@ -32,7 +32,7 @@ public class JogadorMinor extends Agent {
     // Jogada jog;
     Queue<String> message_queue;
 
-    public JogadorMinor(){
+    public Jogador_Minor(){
         super();
         this.index = -1;
         this.mestre = null;
@@ -81,34 +81,34 @@ public class JogadorMinor extends Agent {
                 template.addServices(sd);
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
-                    agents.clear();
-                    armas_oponentes.clear();
+                    if(result.length != agents.size() + 1) {
+                        agents.clear();
+                        armas_oponentes.clear();
 
 
+                        for (int i = 0; i < result.length; i++) {
+                            if (!result[i].getName().getName().equals(myAgent.getName())) {
+                                agents.add(result[i].getName());
+                                ArrayList<String> arm = new ArrayList<>();
+                                for (int j = 0; j < 3; j++) {
+                                    arm.add("Scissors");
+                                    arm.add("Paper");
+                                    arm.add("Rock");
+                                    arm.add("Lizard");
+                                    arm.add("Spock");
+                                }
+                                armas_oponentes.add(arm);
+                                index = agents.size();
+                                AcardsScissors = index * 3;
+                                AcardsRock = AcardsScissors;
+                                AcardsPaper = AcardsScissors;
+                                AcardsLizard = AcardsScissors;
+                                AcardsSpock = AcardsScissors;
 
-                    for (int i = 0; i < result.length; i++) {
-                        if (!result[i].getName().getName().equals(myAgent.getName())) {
-                            agents.add(result[i].getName());
-                            ArrayList<String> arm = new ArrayList<>();
-                            for (int j = 0; j < 3; j++) {
-                                arm.add("Scissors");
-                                arm.add("Paper");
-                                arm.add("Rock");
-                                arm.add("Lizard");
-                                arm.add("Spock");
+
                             }
-                            armas_oponentes.add(arm);
-                            index=agents.size();
-                            AcardsScissors = index*3;
-                            AcardsRock=AcardsScissors;
-                            AcardsPaper=AcardsScissors;
-                            AcardsLizard=AcardsScissors;
-                            AcardsSpock=AcardsScissors;
-
-
 
                         }
-
                     }
                 } catch (FIPAException e) {
                     e.printStackTrace();

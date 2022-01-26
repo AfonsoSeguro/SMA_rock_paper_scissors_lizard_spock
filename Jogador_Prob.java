@@ -24,10 +24,8 @@ public class Jogador_Prob extends Agent {
     ArrayList<String> armas;
     ArrayList<ArrayList<String>> armas_oponentes;
 
-    ArrayList<String> armas_redux;
-    ArrayList<ArrayList<String>> armas_oponentes_redux;
 
-    ArrayList<Jogada> jogs;
+    Jogada [] jogs;
     Jogada jog;
 
     ArrayList<String []> dados;
@@ -53,15 +51,7 @@ public class Jogador_Prob extends Agent {
             this.armas.add("Spock");
         }
         this.armas_oponentes = new ArrayList();
-        this.armas_redux = new ArrayList<>();
-        this.armas_redux.add("Scissors");
-        this.armas_redux.add("Paper");
-        this.armas_redux.add("Rock");
-        this.armas_redux.add("Lizard");
-        this.armas_redux.add("Spock");
-        this.armas_oponentes_redux = new ArrayList<>();
-        this.jogs = new ArrayList<>();
-        this.jog = new Jogada("", -60);
+        jog = new Jogada("", -60);
     }
 
 
@@ -91,28 +81,22 @@ public class Jogador_Prob extends Agent {
                 template.addServices(sd);
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
-                    agents.clear();
-                    armas_oponentes.clear();
-                    armas_oponentes_redux.clear();
-                    for (int i = 0; i < result.length; i++) {
-                        if (!result[i].getName().getName().equals(myAgent.getName())){
-                            agents.add(result[i].getName());
-                            ArrayList<String> arm = new ArrayList<>();
-                            for (int j = 0; j < 3; j++) {
-                                arm.add("Scissors");
-                                arm.add("Paper");
-                                arm.add("Rock");
-                                arm.add("Lizard");
-                                arm.add("Spock");
+                    if(result.length != agents.size() + 1) {
+                        agents.clear();
+                        armas_oponentes.clear();
+                        for (int i = 0; i < result.length; i++) {
+                            if (!result[i].getName().getName().equals(myAgent.getName())) {
+                                agents.add(result[i].getName());
+                                ArrayList<String> arm = new ArrayList<>();
+                                for (int j = 0; j < 3; j++) {
+                                    arm.add("Scissors");
+                                    arm.add("Paper");
+                                    arm.add("Rock");
+                                    arm.add("Lizard");
+                                    arm.add("Spock");
+                                }
+                                armas_oponentes.add(arm);
                             }
-                            armas_oponentes.add(arm);
-                            ArrayList<String> arm_redux = new ArrayList<>();
-                            arm_redux.add("Scissors");
-                            arm_redux.add("Paper");
-                            arm_redux.add("Rock");
-                            arm_redux.add("Lizard");
-                            arm_redux.add("Spock");
-                            armas_oponentes_redux.add(arm_redux);
                         }
                     }
                 } catch (FIPAException e) {
@@ -159,6 +143,7 @@ public class Jogador_Prob extends Agent {
                                     break;
                                 }
                             }
+                            armas_oponentes.set(i, arm_array);
                         }
                     }
                     else{
@@ -185,21 +170,18 @@ public class Jogador_Prob extends Agent {
 
             @Override
             public void action() {
-                jogs.clear();
-                ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-                calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
-                for (int i = 0; i < hip.size(); i++) {
-                    ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)armas_oponentes.clone();
-                    for (int j = 0; j < jog_pos_aux.size(); j++) {
-                        jog_pos_aux.set(j, (ArrayList<String>) armas_oponentes.get(j).clone());
-                        for (int k = 0; k < jog_pos_aux.get(j).size(); k++) {
-                            if(jog_pos_aux.get(j).get(k).equals(hip.get(i)[j])){
-                                jog_pos_aux.get(j).remove(k);
-                                break;
+                jogs = new Jogada[]{new Jogada("Scissors", 0),new Jogada("Paper", 0),new Jogada("Rock", 0),new Jogada("Lizard", 0),new Jogada("Spock", 0)};
+                for (int i = 0; i < armas_oponentes.size(); i++) {
+                    if(i != index){
+                        for (int j = 0; j < armas_oponentes.get(i).size(); j++) {
+                            for (int k = 0; k < jogs.length; k++) {
+                                if(armas_oponentes.get(i).get(j).equals(jogs[k].jogada)){
+                                    jogs[k].valor++;
+                                    break;
+                                }
                             }
                         }
                     }
-                    jogs.add(new Jogada(hip.get(i)[index], max(jog_pos_aux, hip.get(i),1)));//alterar depth
                 }
                 change_state = 1;
             }
@@ -217,18 +199,26 @@ public class Jogador_Prob extends Agent {
             int change_state;
             @Override
             public void action() {
-                if (jogs.size() > 0) {
-                    jog = new Jogada("", -60);
-                    int val = -60;
-                    for (int i = 0; i < jogs.size(); i++) {
-                        if(jogs.get(i).valor > jog.valor)jog = jogs.get(i);
+
+                Jogada [] ponts = new Jogada[armas.size()];
+                for (int i = 0; i < ponts.length; i++) {
+                    ponts[i] = new Jogada(armas.get(i), 0);
+                }
+
+                for (int i = 0; i < ponts.length; i++) {
+                    for (int j = 0; j < jogs.length; j++) {
+                        int ganh = ganha(ponts[i].jogada, jogs[j].jogada);
+                        if(ganh > 0) ponts[i].valor += jogs[j].valor;
+                        else if(ganh < 0) ponts[i].valor -= jogs[j].valor;
                     }
-                    jogs.clear();
-                    change_state = 1;
                 }
-                else {
-                    change_state = 0;
+                
+                jog = new Jogada("", -60);
+                for (int i = 0; i < ponts.length; i++) {
+                    if(jog.valor < ponts[i].valor)jog = ponts[i];
                 }
+                change_state = 1;
+
             }
 
             @Override
@@ -237,7 +227,9 @@ public class Jogador_Prob extends Agent {
             }
         }, "INTENTION");
 
-        fsm.registerState(new OneShotBehaviour(){//Envia uma jogada ao mestre e retira da lista de hipóteses
+
+
+        fsm.registerState(new OneShotBehaviour(){//Envia a jogada escolhida ao mestre e retira da lista de mãos disponiveis para jogar
 
             @Override
             public void action() {
@@ -247,7 +239,10 @@ public class Jogador_Prob extends Agent {
                     m.setContent(jog.jogada);
                     send(m);
                     for (int i = 0; i < armas.size(); i++) {
-                        if(armas.get(i).equals(jog.jogada))armas.remove(i);
+                        if(armas.get(i).equals(jog.jogada)){
+                            armas.remove(i);
+                            break;
+                        }
                     }
                     jog = new Jogada("",-60);
                     if(armas.size() == 0)myAgent.doDelete();
@@ -282,98 +277,39 @@ public class Jogador_Prob extends Agent {
         }
     }
 
-    public int min(ArrayList<ArrayList<String>> jog_pos, String [] jog_ant, int depth){
-        if(depth == 0)return calc_pontos(jog_ant, index);
-        int pont = +60;
-        ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-        calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
-        for (int i = 0; i < hip.size(); i++) {
-            ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)jog_pos.clone();
-            for (int j = 0; j < jog_pos_aux.size(); j++) {
-                jog_pos_aux.set(j, (ArrayList<String>) jog_pos.get(j).clone());
-                for (int k = 0; k < jog_pos_aux.get(j).size(); k++) {
-                    if(jog_pos_aux.get(j).get(k).equals(hip.get(i)[j])){
-                        jog_pos_aux.get(j).remove(k);
-                        break;
-                    }
-                }
-            }
-            int val = max(jog_pos_aux, hip.get(i),depth - 1);
-            pont = pont < val ? pont : val;
-        }
-        return pont;
-    }
-
-    public int max(ArrayList<ArrayList<String>> jog_pos, String [] jog_ant, int depth){
-        if(depth == 0)return calc_pontos(jog_ant, index);
-        int pont = -60;
-        ArrayList<String []> hip = new ArrayList();//pode nao ser necessário
-        calc_hip(hip, armas_oponentes, new String[agents.size()], 0);
-        for (int i = 0; i < hip.size(); i++) {
-            ArrayList<ArrayList<String>> jog_pos_aux = (ArrayList<ArrayList<String>>)jog_pos.clone();
-            for (int j = 0; j < jog_pos_aux.size(); j++) {
-                jog_pos_aux.set(j, (ArrayList<String>) jog_pos.get(j).clone());
-                for (int k = 0; k < jog_pos_aux.get(j).size(); k++) {
-                    if(jog_pos_aux.get(j).get(k).equals(hip.get(i)[j])){
-                        jog_pos_aux.get(j).remove(k);
-                        break;
-                    }
-                }
-            }
-            int val = min(jog_pos_aux, hip.get(i),depth - 1);
-            pont = pont > val ? pont : val;
-        }
-        return pont;
-    }
-
-    public void calc_hip(ArrayList<String [] > hip, ArrayList<ArrayList<String>> jog_pos, String [] jog, int nivel){
-        if(nivel >= jog.length){
-            hip.add(jog);
-            return;
-        }
-        for (int i = 0; i < jog_pos.get(nivel).size(); i++) {
-            jog[nivel] = jog_pos.get(nivel).get(i);
-            calc_hip(hip, jog_pos, (String [])jog.clone(), nivel + 1);
-        }
-    }
-
-    public int calc_pontos(String [] jogadas, int index){
+    public int ganha(String jogada, String oponente){
         int pontos = 0;
-        String jogada = jogadas[index];
-        for (int k = 0; k < jogadas.length; k++) {
-            if(k != index){
-                if(jogada.equals("Scissors")){
-                    if(jogadas[k].equals("Paper"))pontos++;
-                    else if(jogadas[k].equals("Rock"))pontos--;
-                    else if(jogadas[k].equals("Lizard"))pontos++;
-                    else if(jogadas[k].equals("Spock"))pontos--;
-                }
-                else if(jogada.equals("Paper")){
-                    if(jogadas[k].equals("Scissors"))pontos--;
-                    else if(jogadas[k].equals("Rock"))pontos++;
-                    else if(jogadas[k].equals("Lizard"))pontos--;
-                    else if(jogadas[k].equals("Spock"))pontos++;
-                }
-                else if(jogada.equals("Rock")){
-                    if(jogadas[k].equals("Scissors"))pontos++;
-                    else if(jogadas[k].equals("Paper"))pontos--;
-                    else if(jogadas[k].equals("Lizard"))pontos++;
-                    else if(jogadas[k].equals("Spock"))pontos--;
-                }
-                else if(jogada.equals("Lizard")){
-                    if(jogadas[k].equals("Scissors"))pontos--;
-                    else if(jogadas[k].equals("Paper"))pontos++;
-                    else if(jogadas[k].equals("Rock"))pontos--;
-                    else if(jogadas[k].equals("Spock"))pontos++;
-                }
-                else if(jogada.equals("Spock")){
-                    if(jogadas[k].equals("Scissors"))pontos++;
-                    else if(jogadas[k].equals("Paper"))pontos--;
-                    else if(jogadas[k].equals("Rock"))pontos++;
-                    else if(jogadas[k].equals("Lizard"))pontos--;
-                }
-            }
+        if(jogada.equals("Scissors")){
+            if(oponente.equals("Paper"))pontos++;
+            else if(oponente.equals("Rock"))pontos--;
+            else if(oponente.equals("Lizard"))pontos++;
+            else if(oponente.equals("Spock"))pontos--;
+        }
+        else if(jogada.equals("Paper")){
+            if(oponente.equals("Scissors"))pontos--;
+            else if(oponente.equals("Rock"))pontos++;
+            else if(oponente.equals("Lizard"))pontos--;
+            else if(oponente.equals("Spock"))pontos++;
+        }
+        else if(jogada.equals("Rock")){
+            if(oponente.equals("Scissors"))pontos++;
+            else if(oponente.equals("Paper"))pontos--;
+            else if(oponente.equals("Lizard"))pontos++;
+            else if(oponente.equals("Spock"))pontos--;
+        }
+        else if(jogada.equals("Lizard")){
+            if(oponente.equals("Scissors"))pontos--;
+            else if(oponente.equals("Paper"))pontos++;
+            else if(oponente.equals("Rock"))pontos--;
+            else if(oponente.equals("Spock"))pontos++;
+        }
+        else if(jogada.equals("Spock")){
+            if(oponente.equals("Scissors"))pontos++;
+            else if(oponente.equals("Paper"))pontos--;
+            else if(oponente.equals("Rock"))pontos++;
+            else if(oponente.equals("Lizard"))pontos--;
         }
         return pontos;
     }
+
 }
