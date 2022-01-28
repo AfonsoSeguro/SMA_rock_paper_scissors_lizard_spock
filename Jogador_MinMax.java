@@ -13,7 +13,6 @@ import jade.lang.acl.MessageTemplate;
 import java.lang.reflect.Array;
 import java.util.*;
 
-//falta optimização redux
 public class Jogador_MinMax extends Agent {
 
     AID mestre;
@@ -34,7 +33,6 @@ public class Jogador_MinMax extends Agent {
     int index;
 
     Queue<String> message_queue;
-
 
     public Jogador_MinMax(){
         super();
@@ -191,7 +189,7 @@ public class Jogador_MinMax extends Agent {
                             }
                         }
                     }
-                    jogs.add(new Jogada(hip.get(i)[index], min(jog_pos_aux, hip.get(i), -60, 60,5)));//alterar depth
+                    jogs.add(new Jogada(hip.get(i)[index], min(jog_pos_aux, hip.get(i), -60, 60,1)));//alterar depth
                 }
                 change_state = 1;
             }
@@ -213,7 +211,7 @@ public class Jogador_MinMax extends Agent {
                     jog = new Jogada("", -60);
                     int val = -60;
                     for (int i = 0; i < jogs.size(); i++) {
-                        if(jogs.get(i).valor > jog.valor)jog = jogs.get(i);
+                        if(jogs.get(i).valor > jog.valor || (jogs.get(i).valor == jog.valor && Math.random() > 0.9))jog = jogs.get(i);
                     }
                     jogs.clear();
                     change_state = 1;
@@ -248,7 +246,7 @@ public class Jogador_MinMax extends Agent {
                     }
                     armas_redux = convert_redux(armas);
                     jog = new Jogada("",-60);
-                    if(armas.size() == 0)myAgent.doDelete();
+                    if(armas.size() == 0)reini();
                 }
             }
 
@@ -320,7 +318,7 @@ public class Jogador_MinMax extends Agent {
                 }
             }
             int val = max(jog_pos_aux, hip.get(i), alpha, beta,depth - 1);
-            pont = pont < val ? pont : val;
+            pont = (pont < val || (pont == val && Math.random() > 0.9)) ? pont : val;
             alpha = alpha > val ? alpha : val;
             if(beta <= alpha)break;
         }
@@ -344,7 +342,7 @@ public class Jogador_MinMax extends Agent {
                 }
             }
             int val = min(jog_pos_aux, hip.get(i), alpha, beta,depth - 1);
-            pont = pont > val ? pont : val;
+            pont = (pont > val  || (pont == val && Math.random() > 0.9))? pont : val;
             beta = beta < val ? beta : val;
             if(beta <= alpha)break;
         }
@@ -400,5 +398,27 @@ public class Jogador_MinMax extends Agent {
             }
         }
         return pontos;
+    }
+
+    public void reini(){
+        agents.clear();
+        this.index = -1;
+        this.mestre = null;
+        this.agents = new ArrayList<>();
+        this.message_queue = new LinkedList();
+        this.dados = new ArrayList();
+        this.armas = new ArrayList();
+        for (int i = 0; i < 3; i++) {
+            this.armas.add("Scissors");
+            this.armas.add("Paper");
+            this.armas.add("Rock");
+            this.armas.add("Lizard");
+            this.armas.add("Spock");
+        }
+        this.armas_oponentes = new ArrayList();
+        this.jogs = new ArrayList<>();
+        this.jog = new Jogada("", -60);
+        this.armas_redux = convert_redux(armas);
+        this.armas_oponentes_redux = new ArrayList<>();
     }
 }

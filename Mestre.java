@@ -133,11 +133,11 @@ public class Mestre extends Agent {
                     ACLMessage msg = message_queue.remove();
                     int k = 0;
                     for(;k < agents.size(); k++){
+                        String a = agents.get(k).getName();
+                        String b = msg.getSender().getName();
                         if(agents.get(k).getName().equals(msg.getSender().getName()))break;
                     }
                     jog_ronda[k] =  msg.getContent();
-                    System.out.println(msg.getSender().getName() + " jogou " + msg.getContent());
-
                 }
                 dados.add(jog_ronda);
                 for (int j = 0; j < pontos.size(); j++) {
@@ -181,6 +181,7 @@ public class Mestre extends Agent {
                             }
                         }
                     }
+                    System.out.println(agents.get(j).getLocalName() + " jogou " + jogada + " e tem " + pontos.get(j) + " pontos");
                 }
                 
                 done = true;
@@ -194,13 +195,13 @@ public class Mestre extends Agent {
             if(i > max){
                 int maxi =  -60;
                 String winner = "";
-                System.out.print("Classificações: ");
+                System.out.println("Classificações: ");
                 for (int j = 0; j < pontos.size(); j++) {
+                    System.out.println("Jogador " + agents.get(j).getLocalName() + " obteve " + pontos.get(j) + " pontos");
                     if(pontos.get(j) > maxi){
                         maxi = pontos.get(j);
                         winner = agents.get(j).getLocalName();
                     }
-                    System.out.print(pontos.get(j) + " ");
                 }
                 System.out.println("");
                 System.out.println("---------------------------------------------------");

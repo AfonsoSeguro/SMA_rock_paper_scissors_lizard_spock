@@ -51,7 +51,7 @@ public class Jogador_Prob extends Agent {
             this.armas.add("Spock");
         }
         this.armas_oponentes = new ArrayList();
-        jog = new Jogada("", -60);
+        this.jog = new Jogada("", -60);
     }
 
 
@@ -245,7 +245,7 @@ public class Jogador_Prob extends Agent {
                         }
                     }
                     jog = new Jogada("",-60);
-                    if(armas.size() == 0)myAgent.doDelete();
+                    if(armas.size() == 0)reini();
                 }
             }
 
@@ -310,6 +310,25 @@ public class Jogador_Prob extends Agent {
             else if(oponente.equals("Lizard"))pontos--;
         }
         return pontos;
+    }
+
+    public void reini(){
+        agents.clear();
+        this.index = -1;
+        this.mestre = null;
+        this.agents = new ArrayList<>();
+        this.message_queue = new LinkedList();
+        this.dados = new ArrayList();
+        this.armas = new ArrayList();
+        for (int i = 0; i < 3; i++) {
+            this.armas.add("Scissors");
+            this.armas.add("Paper");
+            this.armas.add("Rock");
+            this.armas.add("Lizard");
+            this.armas.add("Spock");
+        }
+        this.armas_oponentes = new ArrayList();
+        this.jog = new Jogada("", -60);
     }
 
 }

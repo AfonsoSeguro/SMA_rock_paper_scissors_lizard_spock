@@ -202,7 +202,7 @@ public class Jogador_All_2 extends Agent {
                     }
                     jog = new Jogada(armas.get(0), -60);
                     for (int i = 0; i < jogadas.length; i++) {
-                        if(jog.valor < jogadas[i].valor && contains_Jog(armas, jogadas[i].jogada))jog = jogadas[i];
+                        if((jog.valor < jogadas[i].valor || (jog.valor == jogadas[i].valor && Math.random() > 0.65)) && contains_Jog(armas, jogadas[i].jogada))jog = jogadas[i];
                     }
                     jogs.clear();
                     change_state = 1;
@@ -236,7 +236,7 @@ public class Jogador_All_2 extends Agent {
                         }
                     }
                     jog = new Jogada("",-60);
-                    if(armas.size() == 0)myAgent.doDelete();
+                    if(armas.size() <= 0)reini();
                 }
             }
 
@@ -324,5 +324,25 @@ public class Jogador_All_2 extends Agent {
             }
         }
         return pontos;
+    }
+
+    public void reini(){
+        agents.clear();
+        this.index = -1;
+        this.mestre = null;
+        this.agents = new ArrayList<>();
+        this.message_queue = new LinkedList();
+        this.dados = new ArrayList();
+        this.armas = new ArrayList();
+        for (int i = 0; i < 3; i++) {
+            this.armas.add("Scissors");
+            this.armas.add("Paper");
+            this.armas.add("Rock");
+            this.armas.add("Lizard");
+            this.armas.add("Spock");
+        }
+        this.armas_oponentes = new ArrayList();
+        this.jogs = new ArrayList<>();
+        this.jog = new Jogada("", -60);
     }
 }

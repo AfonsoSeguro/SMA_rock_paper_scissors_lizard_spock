@@ -48,7 +48,6 @@ public class Jogador_Minor extends Agent {
             armas.add("Spock");
         }
         this.rand = new Random();
-
         this.armas_oponentes = new ArrayList();
 
     }
@@ -84,8 +83,6 @@ public class Jogador_Minor extends Agent {
                     if(result.length != agents.size() + 1) {
                         agents.clear();
                         armas_oponentes.clear();
-
-
                         for (int i = 0; i < result.length; i++) {
                             if (!result[i].getName().getName().equals(myAgent.getName())) {
                                 agents.add(result[i].getName());
@@ -188,11 +185,6 @@ public class Jogador_Minor extends Agent {
                             }
                             if(AcardsSpock==0)AcardsSpock=index*3;
                         }
-
-
-
-
-
                     }
 
                 }
@@ -302,14 +294,10 @@ public class Jogador_Minor extends Agent {
                     }
                 }
 
-
-            } send(content);
+            }
+            send(content);
+            if(armas.size() <= 0)reini();
         }
-
-
-
-
-
     }
     public void send(String content){
         ACLMessage m = new ACLMessage(ACLMessage.PROPOSE);
@@ -319,5 +307,23 @@ public class Jogador_Minor extends Agent {
         send(m);
     }
 
+    public void reini(){
+        agents.clear();
+        this.index = -1;
+        this.mestre = null;
+        this.agents = new ArrayList<>();
+        this.message_queue = new LinkedList();
+        this.dados = new ArrayList();
+        this.armas = new ArrayList();
+        for (int i = 0; i < 3; i++) {
+            armas.add("Scissors");
+            armas.add("Paper");
+            armas.add("Rock");
+            armas.add("Lizard");
+            armas.add("Spock");
+        }
+        this.rand = new Random();
+        this.armas_oponentes = new ArrayList();
+    }
 
 }

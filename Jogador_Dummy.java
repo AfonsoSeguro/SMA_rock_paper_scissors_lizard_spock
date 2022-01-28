@@ -81,12 +81,26 @@ public class Jogador_Dummy extends Agent {
                     message.setContent(armas.remove(rand.nextInt(armas.size())).toString());
                     message.addReceiver(msg.getSender());
                     send(message);
-                    if(armas.size() == 0)myAgent.doDelete();
+                    if(armas.size() == 0)reini();
                 }
                 else block();
             }
         });
 
         addBehaviour(pb);
+    }
+
+    public void reini(){
+        agents.clear();
+        this.agents = new ArrayList<>();
+        this.armas = new ArrayList();
+        for (int i = 0; i < 3; i++) {
+            this.armas.add("Scissors");
+            this.armas.add("Paper");
+            this.armas.add("Rock");
+            this.armas.add("Lizard");
+            this.armas.add("Spock");
+        }
+        this.rand = new Random();
     }
 }
