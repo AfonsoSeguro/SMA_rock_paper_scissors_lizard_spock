@@ -15,8 +15,12 @@
 	\maketitle
 	
 	\section*{Introdução}
+	O projeto escolhido foi o “rock paper scissors lizard spock”, que consiste no jogo ancestral “rock paper scissor” com a adição de dois novos intervenientes, “lizard spock”. Este consiste em 15 rondas em que cada jogador tem de utilizar 3 vezes todos os componentes, somando pontos quando derrota outros e perdendo quando derrotado.\\
+    O objetivo deste trabalho é construir um sistema multi-agente com vários agentes deliberativos em que cada jogador tem uma tática diferente, e no final comparar realizando vários jogos.\\
+    Procuramos mostrar como os agentes funcionam, mostrando a arquitetura interna, as crenças, os desejos e as intenções, e como por estas três fazes os agentes realizam planos e executam ações.
+    Demostramos no final quais os melhores agentes, o porquê de eles serem os melhores, realizando vários jogos entre todos e demonstrando os resultados.\\
+
 	
-	\newpage
 	\section*{Contexto}
 	O projeto que foi decidido implementar foi o “rock paper scissors lizard spock”, uma variação do jogo tradicional, “pedra papel tesoura”, que implementa mais 2 novas personagens (lizard, spock).\\
     Este jogo consiste num número mínimo de 2 jogadores que podem escolher apenas uma das personagens intervenientes para jogar, obtendo uma cotação quando defrontado, positiva (1) caso ganhe, negativa (-1) caso perca. Isto é repetido na sucessão de 15 rondas, sendo que cada jogador obtém 3 vezes cada umas das personagens iniciais, indo gastando-as a medida do decorrer das rondas.\\
@@ -38,7 +42,6 @@
     
     Iremos fazer uma breve explicação deles na arquitetura de cada agente mais a frente.
 	
-	\newpage
 	\section*{Arquitetura Geral}
 	Como já referido no contexto, este jogo consiste na criação de vários agentes jogadores que são regidos por um agente mestre.\\
     O agente mestre, é peça central de todo o jogo, mas, no entanto, não necessita de ser tão deliberativo como os agentes jogadores, pois apenas tem de recolher e calcular todas as jogadas de todos os intervenientes. Para tal, a maneira de como ele alcança todos os outros, é deveras importante para o bom funcionamento do jogo. \\
@@ -57,7 +60,6 @@
 	Na primeira ronda como não há jogadas anteriores, é enviado o índex do jogador, ou seja, no array onde são enviadas as jogadas anteriores, qual a iteração que mostras as suas jogadas.\\
 	
 	
-	\newpage
 	\section*{Arquitetura interna dos agentes}
 	
 	Nesta secção vamos mostrar a arquitetura interna dos agentes, quais os behaviors que os constituem, onde e como são calculados os planos consoante as crenças, os desejos e as intenções, e como tudo junto resulta na ação.\\
@@ -139,23 +141,100 @@
     O jogador All2, realiza exatamente o mesmo, mas ao invés de somar os pontos por cada caso possível, soma 1 nos casos que obteve pontuação positiva e -1 nos de pontuação negativa.
     A grande diferença entre eles, é nos casos em que uma mão possa ganhar mais pontos no total de todos os casos possíveis, mas, no entanto, não quer dizer que ganhe a maioria dos casos, o jogador all1, opta pela mão que obteve mais pontos, e o jogador all2 opta pela mão que ganha mais casos. A passo de exemplo, imaginando que a mão tesoura obtém 10 pontos, mas apenas ganha 15 de 30 jogos possíveis, e a mão papel ganha 5 pontos, mas ganha 20 de 30 casos, o jogador All1 escolhe a mão tesoura e o All2 a mão papel.\\
 
-	
 	\subsubsection*{Jogador Prob}
 	O jogador prob, é dos que mais diferes, tando no cálculo de planos, como na escolha.
     Este jogador nas crenças, é igual aos outros todos, apenas reformula quais as mãos possíveis dele e dos outros jogadores.\\
     Nos desejos, é onde mais difere dos outros, pois este soma todas as mãos de todos os jogadores, ou seja, vê quantas tesouras é podem ainda ser jogadas, quantos papeis podem ser jogados e etc. Sendo que os que tiverem maior valor, é os que têm mais probabilidade de saírem pelos oponentes.\\
-    Nas intenções, este pega em todas as mãos que ainda lhe sobram e compara com as mãos com maior probabilidade de sair, sendo atribuído uma cotação igual á quantidade de mãos que existem vezes 1 se ganhar, ou -1 se perder. No final, é tudo somado, e a mão que tiver maior cotação é enviada para o estado play para ser jogado.
+    Nas intenções, este pega em todas as mãos que ainda lhe sobram e compara com as mãos com maior probabilidade de sair, sendo atribuído uma cotação igual á quantidade de mãos que existem vezes 1 se ganhar, ou -1 se perder. No final, é tudo somado, e a mão que tiver maior cotação é enviada para o estado play para ser jogado.\\
 
-	
 	\subsubsection*{Jogador Minor}
+	catarina escrever
+	
+	\subsubsection*{Jogador Dummy}
+	O jogador Dummy não tem nem desejos nem intenções apenas responde com uma mão aleatória.\\
 	
 	
-	\newpage
 	\section*{Resultados, comparação de agentes}
 	
+    Nesta secção do relatório, vamos comparar todos os agentes, tanto em combates de 1 vs 1 como em vários jogos com todos os elementos. E dai retiramos as devidas conclusões.\\
 	
-	\newpage
-	\section*{Conclusões}
+	\subsection*{1 vs 1}
 	
+	\begin{table}[h]
+	    \centering
+	    \begin{tabular}{ |p{4cm}|p{2cm}|p{2cm}|p{2cm}|p{4cm}|  }
+	    \hline
+	     Jogador/Partidas & 1ª & 2ª & 3ª & Vencedor Final \\\hline
+         Dummy vs Dummy	& Segundo	& Segundo	& Segundo	& Dummy\\\hline
+         Dummy vs Prob	& Primeiro	& Primeiro	& Primeiro	& Dummy\\\hline
+         Dummy vs All2	& Primeiro	& Segundo	& Segundo	& All2\\\hline
+         Dummy vs All1	& Primeiro	& Primeiro	& Primeiro	& Dummy\\\hline
+         Dummy vs MinMax	& Primeiro	& Segundo	& Segundo	& MinMax\\\hline
+         Dummy vs Minor	& Primeiro	& Primeiro	& Primeiro	& Dummy\\\hline
+         Prob vs Prob	& Primeiro	& Primeiro	& Primeiro	& Prob\\\hline
+         Prob vs All2	& Primeiro	& Primeiro	& Primeiro	& Prob\\\hline
+         Prob vs All1	& Primeiro	& Primeiro	& Primeiro	& Prob\\\hline
+         Prob vs MinMax	& Segundo	& Primeiro	& Segundo	& MinMax\\\hline
+         Prob vs Minor	& Segundo	& Segundo	& Segundo	& Minor\\\hline
+         All2 vs All2	& Primeiro	& Primeiro	& Primeiro	& All2\\\hline
+         All2 vs All1	& Segundo	& Segundo	& Segundo	& All1\\\hline
+         All2 vs MinMax	& Segundo	& Segundo	& Segundo	& MinMax\\\hline
+         All2 vs Minor	& Segundo	& Segundo	& Primeiro	& Minor\\\hline
+         All1 vs All1	& Primeiro	& Primeiro	& Primeiro	& All1\\\hline
+         All1 vs MinMax	& Segundo	& Segundo	& Segundo	& MinMax\\\hline
+         All1 vs Minor	& Segundo	& Segundo	& Segundo	& Minor\\\hline
+         MinMax vs MinMax	& Segundo	& Segundo	& Segundo	& MinMax\\\hline
+         MinMax vs Minor	& Segundo	& Primeiro	& Segundo	& Minor\\\hline
+         Minor vs Minor	& Primeiro	& Segundo	& Primeiro	& Minor\\\hline
+	    \end{tabular}
+    	\caption{Partidas entre dois jogadores}
+	\end{table}
+	
+	Na tabela acima, é apresentado as partidas entre todos os jogadores individualmente, sendo decidido após a vitoria em maioria de três jogos por partida. Consegue-se perceber que o jogador MinMax e o jogador Minor foram os que obtiveram melhores classificações, dando uma vantagem ao Minor que ganhou no confronto direto. De resto, de notar que o Dummy também teve um bom número de vitorias, de notar que a tática de jogadas aleatórias acaba por ser melhor que algumas deliberativas.\\
+	
+	\subsection*{All vs All}
+	Na disposição de vários contra vários, foi realizado 10 jogos de 15 rondas cada, com o âmbito de analisar qual o jogador que obteve mais vitorias.\\
+    Devido ao tempo que alguns jogadores demoram a jogar, foi decidido utilizar apenas uma profundidade de 1 no jogador MinMax, isto relembrando que a complexidade temporal é exponencial consoante o número de jogadores, porque há mais casos possíveis de jogadas.\\
+
+	\begin{table}[h]
+	    \centering
+	    \begin{tabular}{ |p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{2cm}|  }
+	    \hline
+	    Jogo & All1	& All2	& Dummy & MinMax & Minor & Prob & Vencedor\\\hline
+	    1	& -16	& -16	& 16	& 8	    & 0	    & 8	    & Dummy\\\hline
+        2	& -3	& -3	& -6	& -5	& 1	    & 16	& Prob\\\hline
+        3	& 1	    & 1	    & -21	& 0     & 4	    & 15	& Prob\\\hline
+        4	& -12	& -12	& 9	    &10     & -4	& 9	    & MinMax\\\hline
+        5	& 1	    & 1	    & -2	& 10	& 4	    & -14	& MinMax\\\hline
+        6	& -4	& -4	& 1	    & -6	& 14	& -1	& Minor\\\hline
+        7	& -10	& -10	& 3	    & 8	    & -3	& 12	& Prob\\\hline
+        8	& -4	& -4	& -6	& 14	&-5	    & 5	    & MinMax\\\hline
+        9	& -2	& -2	& -14	& 9	    & 1	    & 8	    & MinMax\\\hline
+        10	& -3	& -3	& -6	& 14	&-5	    & 3	    & MinMax\\\hline
+	    \end{tabular}
+    	\caption{Partidas entre todos os jogadores}
+	\end{table}
+	
+	\begin{table}[h]
+	    \centering
+	    \begin{tabular}{ |p{4cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|  }
+	    \hline
+	    Jogador  & MinMax   & Prob  & Minor & Dummy & All1  & All2\\\hline
+	    Nº de vitórias	& 5	    & 3	    & 1	    & 1	    & 0	    & 0\\\hline
+        Média de pontos & 6.2   & 6.1   & 0.7	& -2.6	& -5.2	& -5.2\\\hline
+	    \end{tabular}
+    	\caption{Número de vitórias e medias de pontos das partidas entre todos os jogadores}
+	\end{table}
+	
+	Na primeira tabela apresentada(Tabela 1), é demonstrado o resultado de 10 jogos, apresentando também o vencedor de cada. A primeira conclusão, foi a maioria de vitorias do algoritmo MinMax e Prob, pois estes são os que mais jogam em conta com as futuras jogadas, ou seja, os seus planos tendem a olhar para as rondas mais longínquas, não se preocupando apenas com a ronda jogada agora.\\
+	
+    A segunda tabela(Tabela 2) demostra a média de pontos ganhos no total, tal como o número de vitórias, percebe que os dois são proporcionalmente diretos, pois quanto maior a média de pontos, maior as vitórias.\\
+    
+    Outro jogador que sobressaio foi o jogador Prob, tendo apenas menos uma decima de diferença do MinMax, que tem um tanto de ironia, pois o MinMax tem mais parecenças com os jogadores All, e, no entanto, são os mais extremados da classificação final, mas tendo o jogador MinMax e Prob métodos tão diferentes, e classificações tão próximas.\\
+
+	\section*{Conclusão}
+	Com este trabalho podemos retirar várias conclusões, pela demonstração de uma arquitetura geral para a comunicação de vários agentes, às arquiteturas internas de cada jogador, e a criação de vários algoritmos aplicáveis a este jogo. Como tal, a partir dos resultados obtidos conseguimos perceber quais as arquiteturas que melhor se aplicam, como as crenças são fundamentais para fazer planos, pois é o que o agente conhece do ambiente, e como diferentes desejos e intenções afetam a ação final, de notar que aquelas com maior mira a rondas futuras tendem a ser melhores.\\
+    Sendo o objetivo a construção de sistemas multiagentes na resolução de problemas complexos, o trabalho demonstra que se conseguiu atingir o objetivo a que estava proposto. Foi uma experiência bastante enriquecedora, não só a nível académico como também pessoal. Permitiu-nos também crescer como pessoas e adquirir qualidades de extrema importância no mundo da programação e conhecimentos até à data ainda não adquiridos ou consolidados.\\
+
 	
 \end{document}

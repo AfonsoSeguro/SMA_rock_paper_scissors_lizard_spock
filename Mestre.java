@@ -58,17 +58,20 @@ public class Mestre extends Agent {
                 template.addServices(sd);
                 try {
                     DFAgentDescription[] result = DFService.search(myAgent, template);
-                    agents.clear();
-                    pontos.clear();
-                    for (int i = 0; i < result.length; i++) {
-                        if (!result[i].getName().getName().equals(myAgent.getName()))
-                            agents.add(result[i].getName());
+                    if(result.length != agents.size() + 1) {
+                        agents.clear();
+                        pontos.clear();
+                        for (int i = 0; i < result.length; i++) {
+                            if (!result[i].getName().getName().equals(myAgent.getName()))
+                                agents.add(result[i].getName());
                             pontos.add(0);
+                        }
+                        pontos.remove(pontos.size() - 1);
                     }
-                    pontos.remove(pontos.size() - 1);
                 } catch (FIPAException e) {
                     e.printStackTrace();
                 }
+
 
             }
         });
@@ -133,8 +136,6 @@ public class Mestre extends Agent {
                     ACLMessage msg = message_queue.remove();
                     int k = 0;
                     for(;k < agents.size(); k++){
-                        String a = agents.get(k).getName();
-                        String b = msg.getSender().getName();
                         if(agents.get(k).getName().equals(msg.getSender().getName()))break;
                     }
                     jog_ronda[k] =  msg.getContent();
